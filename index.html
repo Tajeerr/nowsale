@@ -183,6 +183,12 @@
     font-size:3.2rem;
     position:relative;
   }
+  .tag-photo img{
+    width:100%;height:100%;
+    object-fit:cover;
+    position:absolute;
+    inset:0;
+  }
   .tag-photo span.cap{
     position:absolute;
     bottom:.5rem;
@@ -308,6 +314,14 @@
     line-height:1;
   }
 
+  .modal-photo{
+    width:100%;
+    height:200px;
+    object-fit:cover;
+    border-radius:var(--radius);
+    margin-bottom:1rem;
+  }
+
   .modal h2{
     font-family:'Reem Kufi', sans-serif;
     margin:0 0 .2rem;
@@ -354,7 +368,7 @@
     <!-- غيّر النص داخل الختم واسم الموقع حسب اسم متجرك -->
     <div class="stamp">سم</div>
     <h1>سوق المواشي</h1>
-    <p class="tagline">من المربي إلى بيتك مباشرة — ابو ريان لبيع المواشي تصفّح القطعان، قارن المواصفات، وتواصل دون وسيط</p>
+    <p class="tagline">من المربي إلى بيتك مباشرة — تصفّح القطعان، قارن المواصفات، وتواصل دون وسيط</p>
 
     <div class="toolbar">
       <input type="search" id="searchInput" placeholder="ابحث بالسلالة أو المدينة...">
@@ -393,17 +407,20 @@
   /* =========================================================
      بيانات المواشي — هذا هو المكان الذي تضيف منه إعلاناتك الحقيقية.
      انسخ الكتلة { ... } وعدّل القيم لإضافة قطعة جديدة.
-     emoji: 🐄 أبقار / 🐑 أغنام / 🐐 ماعز / 🐫 إبل
+     emoji: 🐄 أبقار / 🐑 أغنام / 🐐 ماعز / 🐫 إبل (تظهر فقط إن لم تضع صورة)
+     image: رابط الصورة الحقيقية. اتركه فارغًا '' لإظهار الأيقونة بدلاً منها.
+            مثال بعد رفع الصور لمجلد images داخل المستودع:
+            image: 'images/sheep1.jpg'
   ========================================================= */
   const livestock = [
-    { id:1, serial:'ETG-0231', category:'أغنام', emoji:'🐑', breed:'نعيمي', age:'8 أشهر', weight:42, gender:'ذكر', health:'ممتازة', price:850, location:'الرياض' },
-    { id:2, serial:'ETG-0455', category:'أغنام', emoji:'🐑', breed:'عارضي', age:'سنة واحدة', weight:65, gender:'ذكر', health:'ممتازة', price:1200, location:'الدمام' },
-    { id:3, serial:'ETG-0612', category:'أبقار', emoji:'🐄', breed:'هولشتاين', age:'سنتان', weight:380, gender:'أنثى', health:'حلوب — إنتاج عالٍ', price:7500, location:'القصيم' },
-    { id:4, serial:'ETG-0789', category:'أبقار', emoji:'🐄', breed:'نجدي', age:'3 سنوات', weight:410, gender:'ذكر', health:'جاهز للتسمين', price:6200, location:'حائل' },
-    { id:5, serial:'ETG-0901', category:'إبل', emoji:'🐫', breed:'مجاهيم', age:'4 سنوات', weight:480, gender:'أنثى', health:'ولود — حليب وفير', price:18000, location:'الشرقية' },
-    { id:6, serial:'ETG-1043', category:'إبل', emoji:'🐫', breed:'صفر', age:'5 سنوات', weight:520, gender:'ذكر', health:'مدرّب للسباقات', price:35000, location:'تبوك' },
-    { id:7, serial:'ETG-1187', category:'ماعز', emoji:'🐐', breed:'شامي', age:'10 أشهر', weight:38, gender:'أنثى', health:'حلوب', price:950, location:'جدة' },
-    { id:8, serial:'ETG-1299', category:'ماعز', emoji:'🐐', breed:'عارضي', age:'سنة واحدة', weight:45, gender:'ذكر', health:'ممتازة', price:1100, location:'المدينة المنورة' },
+    { id:1, serial:'ETG-0231', category:'أغنام', emoji:'🐑', image:'images/sheep-naimi.jpg', breed:'نعيمي', age:'8 أشهر', weight:42, gender:'ذكر', health:'ممتازة', price:850, location:'الرياض' },
+    { id:2, serial:'ETG-0455', category:'أغنام', emoji:'🐑', image:'images/sheep-ardi.jpg', breed:'عارضي', age:'سنة واحدة', weight:65, gender:'ذكر', health:'ممتازة', price:1200, location:'الدمام' },
+    { id:3, serial:'ETG-0612', category:'أبقار', emoji:'🐄', image:'images/cow-holstein.jpg', breed:'هولشتاين', age:'سنتان', weight:380, gender:'أنثى', health:'حلوب — إنتاج عالٍ', price:7500, location:'القصيم' },
+    { id:4, serial:'ETG-0789', category:'أبقار', emoji:'🐄', image:'', breed:'نجدي', age:'3 سنوات', weight:410, gender:'ذكر', health:'جاهز للتسمين', price:6200, location:'حائل' },
+    { id:5, serial:'ETG-0901', category:'إبل', emoji:'🐫', image:'', breed:'مجاهيم', age:'4 سنوات', weight:480, gender:'أنثى', health:'ولود — حليب وفير', price:18000, location:'الشرقية' },
+    { id:6, serial:'ETG-1043', category:'إبل', emoji:'🐫', image:'images/camel-safar.jpg', breed:'صفر', age:'5 سنوات', weight:520, gender:'ذكر', health:'مدرّب للسباقات', price:35000, location:'تبوك' },
+    { id:7, serial:'ETG-1187', category:'ماعز', emoji:'🐐', image:'images/goat-shami.jpg', breed:'شامي', age:'10 أشهر', weight:38, gender:'أنثى', health:'حلوب', price:950, location:'جدة' },
+    { id:8, serial:'ETG-1299', category:'ماعز', emoji:'🐐', image:'images/goat-ardi.jpg', breed:'عارضي', age:'سنة واحدة', weight:45, gender:'ذكر', health:'ممتازة', price:1100, location:'المدينة المنورة' },
   ];
 
   // غيّر هذا الرقم إلى رقم واتساب متجرك (بالصيغة الدولية بدون + أو أصفار في البداية)
@@ -425,15 +442,19 @@
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`;
   }
 
+  function photoHTML(item){
+    if(item.image){
+      return `<div class="tag-photo cat-${item.category}"><img src="${item.image}" alt="${item.breed}" loading="lazy"></div>`;
+    }
+    return `<div class="tag-photo cat-${item.category}">${item.emoji}<span class="cap">صورة توضيحية</span></div>`;
+  }
+
   function cardHTML(item){
     return `
       <article class="tag-card">
         <span class="tag-hole"></span>
         <span class="tag-serial">${item.serial}</span>
-        <div class="tag-photo cat-${item.category}">
-          ${item.emoji}
-          <span class="cap">صورة توضيحية</span>
-        </div>
+        ${photoHTML(item)}
         <div class="tag-body">
           <h3>${item.breed}</h3>
           <span class="tag-category">${item.category}</span>
@@ -507,6 +528,7 @@
     const item = livestock.find(i => i.id === id);
     if(!item) return;
     modalContent.innerHTML = `
+      ${item.image ? `<img class="modal-photo" src="${item.image}" alt="${item.breed}">` : ''}
       <h2 id="modalTitle">${item.emoji} ${item.breed}</h2>
       <span class="modal-cat">${item.category} · رقم الإعلان ${item.serial}</span>
       <dl>
