@@ -1,23 +1,550 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>موقع Nowsale</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f4f4f9;
-            color: #333;
-            padding: 50px;
-        }
-        h1 { color: #24292e; }
-        p { font-size: 18px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سوق المواشي — تصفّح وتواصل مباشرة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@500;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  /* ===== لوحة الألوان والمتغيرات ===== */
+  :root{
+    --ink:#2B2420;
+    --sand:#E8DCC8;
+    --cream:#F5EFE3;
+    --clay:#8B5A3C;
+    --olive:#6B7156;
+    --rust:#C2542C;
+    --radius:6px;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--sand);
+    color:var(--ink);
+    font-family:'IBM Plex Sans Arabic', sans-serif;
+    line-height:1.6;
+  }
+  .container{max-width:1180px;margin:0 auto;padding-inline:1.25rem;}
+
+  a{color:inherit;}
+  button{font-family:inherit;cursor:pointer;}
+
+  :focus-visible{outline:3px solid var(--rust);outline-offset:2px;}
+
+  /* ===== الهيدر / الواجهة ===== */
+  .hero{
+    padding:3rem 0 2.5rem;
+    text-align:center;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(139,90,60,0.08), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(107,113,86,0.10), transparent 45%);
+  }
+
+  .stamp{
+    position:relative;
+    width:108px;height:108px;
+    margin:0 auto 1.25rem;
+    border:3px solid var(--rust);
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    transform:rotate(-7deg);
+    color:var(--rust);
+    font-family:'Reem Kufi', sans-serif;
+    font-weight:700;
+    font-size:1.6rem;
+  }
+  .stamp::after{
+    content:'';
+    position:absolute;
+    inset:9px;
+    border:1.5px dashed var(--rust);
+    border-radius:50%;
+  }
+
+  .hero h1{
+    font-family:'Reem Kufi', sans-serif;
+    font-weight:700;
+    font-size:clamp(2rem, 5vw, 3rem);
+    margin:0 0 .5rem;
+    letter-spacing:.5px;
+  }
+  .hero p.tagline{
+    margin:0 auto 2rem;
+    max-width:34ch;
+    color:var(--clay);
+    font-size:1.05rem;
+  }
+
+  .toolbar{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:1rem;
+  }
+
+  #searchInput{
+    width:100%;
+    max-width:420px;
+    padding:.85rem 1.1rem;
+    border:2px solid var(--clay);
+    border-radius:999px;
+    background:var(--cream);
+    color:var(--ink);
+    font-family:inherit;
+    font-size:1rem;
+  }
+  #searchInput::placeholder{color:#8a7e6f;}
+
+  .tabs{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:.4rem;
+  }
+  .tab{
+    border:2px solid var(--olive);
+    background:transparent;
+    color:var(--olive);
+    padding:.5rem 1.2rem;
+    border-radius:999px 999px 0 0 / 999px 999px 0 0;
+    font-weight:600;
+    font-size:.92rem;
+    transition:background .15s ease, color .15s ease;
+  }
+  .tab.active, .tab:hover{
+    background:var(--olive);
+    color:var(--cream);
+  }
+
+  /* ===== شريط النتائج ===== */
+  .results-bar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin:2.25rem 0 1rem;
+    font-family:'JetBrains Mono', monospace;
+    font-size:.85rem;
+    color:var(--clay);
+    border-bottom:1.5px dashed rgba(43,36,32,.25);
+    padding-bottom:.6rem;
+  }
+
+  /* ===== شبكة البطاقات ===== */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));
+    gap:1.5rem;
+    padding-bottom:3rem;
+  }
+
+  .tag-card{
+    position:relative;
+    background:var(--cream);
+    border-radius:var(--radius);
+    overflow:hidden;
+    box-shadow:0 1px 3px rgba(43,36,32,.12);
+    transition:transform .18s ease, box-shadow .18s ease;
+  }
+  @media (prefers-reduced-motion: no-preference){
+    .tag-card:hover{transform:translateY(-4px);box-shadow:0 10px 22px rgba(43,36,32,.18);}
+  }
+
+  .tag-hole{
+    position:absolute;
+    top:.6rem;
+    inset-inline-start:.6rem;
+    width:16px;height:16px;
+    border-radius:50%;
+    background:var(--sand);
+    border:2px solid var(--ink);
+    z-index:2;
+  }
+  .tag-serial{
+    position:absolute;
+    top:.85rem;
+    inset-inline-end:.85rem;
+    font-family:'JetBrains Mono', monospace;
+    font-size:.72rem;
+    font-weight:700;
+    color:var(--cream);
+    background:rgba(43,36,32,.55);
+    padding:.2rem .5rem;
+    border-radius:3px;
+    z-index:2;
+  }
+
+  .tag-photo{
+    height:170px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:3.2rem;
+    position:relative;
+  }
+  .tag-photo span.cap{
+    position:absolute;
+    bottom:.5rem;
+    inset-inline-end:.6rem;
+    font-size:.65rem;
+    font-family:'JetBrains Mono', monospace;
+    color:rgba(245,239,227,.75);
+  }
+  .cat-أبقار{background:var(--clay);}
+  .cat-أغنام{background:var(--olive);}
+  .cat-ماعز{background:color-mix(in srgb, var(--olive) 55%, var(--cream));}
+  .cat-إبل{background:var(--ink);}
+
+  .tag-body{
+    padding:1rem 1.1rem 1.1rem;
+    border-top:2px dashed rgba(43,36,32,.25);
+  }
+  .tag-body h3{
+    margin:0 0 .15rem;
+    font-size:1.15rem;
+  }
+  .tag-category{
+    display:inline-block;
+    font-size:.75rem;
+    color:var(--olive);
+    font-weight:600;
+    margin-bottom:.6rem;
+  }
+
+  .tag-specs{
+    list-style:none;
+    margin:0 0 .8rem;
+    padding:0;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:.35rem .5rem;
+    font-size:.85rem;
+  }
+  .tag-specs li{display:flex;flex-direction:column;}
+  .tag-specs span{color:#8a7e6f;font-size:.72rem;}
+  .tag-specs b{font-family:'JetBrains Mono', monospace;font-weight:700;}
+
+  .tag-price{
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    font-size:1.15rem;
+    color:var(--rust);
+    margin-bottom:.85rem;
+  }
+
+  .tag-actions{display:flex;gap:.6rem;}
+  .btn-outline, .btn-stamp{
+    flex:1;
+    text-align:center;
+    padding:.6rem .5rem;
+    border-radius:var(--radius);
+    font-weight:700;
+    font-size:.85rem;
+    border:2px solid var(--ink);
+    background:transparent;
+    color:var(--ink);
+    text-decoration:none;
+    display:inline-block;
+    transition:background .15s ease, color .15s ease;
+  }
+  .btn-outline:hover{background:var(--ink);color:var(--cream);}
+  .btn-stamp{
+    border-color:var(--rust);
+    background:var(--rust);
+    color:var(--cream);
+  }
+  .btn-stamp:hover{background:#a8431f;}
+
+  /* ===== حالة عدم وجود نتائج ===== */
+  .empty-state{
+    text-align:center;
+    padding:3rem 1rem;
+    color:var(--clay);
+  }
+  .empty-state button{
+    margin-top:1rem;
+    border:2px solid var(--rust);
+    background:transparent;
+    color:var(--rust);
+    padding:.5rem 1.3rem;
+    border-radius:999px;
+    font-weight:700;
+  }
+  .empty-state button:hover{background:var(--rust);color:var(--cream);}
+
+  /* ===== النافذة المنبثقة (التفاصيل) ===== */
+  .modal-backdrop{
+    position:fixed;inset:0;
+    background:rgba(43,36,32,.65);
+    display:none;
+    align-items:center;justify-content:center;
+    padding:1rem;
+    z-index:50;
+  }
+  .modal-backdrop.open{display:flex;}
+  .modal{
+    background:var(--cream);
+    border-radius:var(--radius);
+    max-width:480px;width:100%;
+    max-height:88vh;
+    overflow-y:auto;
+    position:relative;
+    padding:1.75rem 1.5rem 1.5rem;
+  }
+  @media (prefers-reduced-motion: no-preference){
+    .modal{animation:pop .18s ease;}
+  }
+  @keyframes pop{from{transform:scale(.96);opacity:0;}to{transform:scale(1);opacity:1;}}
+
+  .modal-close{
+    position:absolute;
+    top:.75rem;
+    inset-inline-end:.75rem;
+    background:transparent;
+    border:none;
+    font-size:1.3rem;
+    color:var(--ink);
+    line-height:1;
+  }
+
+  .modal h2{
+    font-family:'Reem Kufi', sans-serif;
+    margin:0 0 .2rem;
+  }
+  .modal .modal-cat{color:var(--olive);font-weight:600;font-size:.85rem;margin-bottom:1rem;display:block;}
+
+  .modal dl{
+    display:grid;
+    grid-template-columns:auto 1fr;
+    gap:.55rem 1rem;
+    margin:0 0 1.25rem;
+    font-size:.92rem;
+  }
+  .modal dt{color:#8a7e6f;}
+  .modal dd{margin:0;font-family:'JetBrains Mono', monospace;font-weight:700;text-align:start;}
+
+  .modal-price{
+    font-family:'JetBrains Mono', monospace;
+    font-size:1.4rem;
+    font-weight:700;
+    color:var(--rust);
+    margin-bottom:1.25rem;
+  }
+  .modal-actions{display:flex;gap:.6rem;flex-wrap:wrap;}
+  .modal-actions a, .modal-actions button{
+    flex:1;
+    min-width:140px;
+  }
+
+  /* ===== الفوتر ===== */
+  footer{
+    text-align:center;
+    padding:2rem 1rem 3rem;
+    color:#8a7e6f;
+    font-size:.85rem;
+    border-top:1.5px dashed rgba(43,36,32,.25);
+  }
+</style>
 </head>
 <body>
-    <h1>أهلاً بك في موقع Nowsale الجديد! ✨</h1>
-    <p>تم تصميم هذا الموقع بنجاح واستضافته عبر GitHub Pages.</p>
+
+<header class="hero">
+  <div class="container">
+    <!-- غيّر النص داخل الختم واسم الموقع حسب اسم متجرك -->
+    <div class="stamp">سم</div>
+    <h1>سوق المواشي</h1>
+    <p class="tagline">من المربي إلى بيتك مباشرة — تصفّح القطعان، قارن المواصفات، وتواصل دون وسيط</p>
+
+    <div class="toolbar">
+      <input type="search" id="searchInput" placeholder="ابحث بالسلالة أو المدينة...">
+      <div class="tabs" id="tabs">
+        <button class="tab active" data-filter="الكل">الكل</button>
+        <button class="tab" data-filter="أبقار">أبقار</button>
+        <button class="tab" data-filter="أغنام">أغنام</button>
+        <button class="tab" data-filter="ماعز">ماعز</button>
+        <button class="tab" data-filter="إبل">إبل</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <div class="results-bar">
+    <span id="resultsCount">—</span>
+    <span>آخر تحديث: اليوم</span>
+  </div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<footer>
+  <p>سوق المواشي — جميع الإعلانات لأغراض العرض، يُرجى معاينة القطيع قبل إتمام أي عملية شراء.</p>
+</footer>
+
+<!-- ===== النافذة المنبثقة لعرض كامل التفاصيل ===== -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <button class="modal-close" id="modalClose" aria-label="إغلاق">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+  /* =========================================================
+     بيانات المواشي — هذا هو المكان الذي تضيف منه إعلاناتك الحقيقية.
+     انسخ الكتلة { ... } وعدّل القيم لإضافة قطعة جديدة.
+     emoji: 🐄 أبقار / 🐑 أغنام / 🐐 ماعز / 🐫 إبل
+  ========================================================= */
+  const livestock = [
+    { id:1, serial:'ETG-0231', category:'أغنام', emoji:'🐑', breed:'نعيمي', age:'8 أشهر', weight:42, gender:'ذكر', health:'ممتازة', price:850, location:'الرياض' },
+    { id:2, serial:'ETG-0455', category:'أغنام', emoji:'🐑', breed:'عارضي', age:'سنة واحدة', weight:65, gender:'ذكر', health:'ممتازة', price:1200, location:'الدمام' },
+    { id:3, serial:'ETG-0612', category:'أبقار', emoji:'🐄', breed:'هولشتاين', age:'سنتان', weight:380, gender:'أنثى', health:'حلوب — إنتاج عالٍ', price:7500, location:'القصيم' },
+    { id:4, serial:'ETG-0789', category:'أبقار', emoji:'🐄', breed:'نجدي', age:'3 سنوات', weight:410, gender:'ذكر', health:'جاهز للتسمين', price:6200, location:'حائل' },
+    { id:5, serial:'ETG-0901', category:'إبل', emoji:'🐫', breed:'مجاهيم', age:'4 سنوات', weight:480, gender:'أنثى', health:'ولود — حليب وفير', price:18000, location:'الشرقية' },
+    { id:6, serial:'ETG-1043', category:'إبل', emoji:'🐫', breed:'صفر', age:'5 سنوات', weight:520, gender:'ذكر', health:'مدرّب للسباقات', price:35000, location:'تبوك' },
+    { id:7, serial:'ETG-1187', category:'ماعز', emoji:'🐐', breed:'شامي', age:'10 أشهر', weight:38, gender:'أنثى', health:'حلوب', price:950, location:'جدة' },
+    { id:8, serial:'ETG-1299', category:'ماعز', emoji:'🐐', breed:'عارضي', age:'سنة واحدة', weight:45, gender:'ذكر', health:'ممتازة', price:1100, location:'المدينة المنورة' },
+  ];
+
+  // غيّر هذا الرقم إلى رقم واتساب متجرك (بالصيغة الدولية بدون + أو أصفار في البداية)
+  const WHATSAPP_NUMBER = '966500000000';
+
+  const grid = document.getElementById('grid');
+  const resultsCount = document.getElementById('resultsCount');
+  const searchInput = document.getElementById('searchInput');
+  const tabs = document.getElementById('tabs');
+  const modalBackdrop = document.getElementById('modalBackdrop');
+  const modalContent = document.getElementById('modalContent');
+  const modalClose = document.getElementById('modalClose');
+
+  let activeFilter = 'الكل';
+  let lastFocused = null;
+
+  function waLink(item){
+    const msg = encodeURIComponent(`مرحبًا، أنا مهتم بالإعلان رقم ${item.serial} (${item.breed}).`);
+    return `https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`;
+  }
+
+  function cardHTML(item){
+    return `
+      <article class="tag-card">
+        <span class="tag-hole"></span>
+        <span class="tag-serial">${item.serial}</span>
+        <div class="tag-photo cat-${item.category}">
+          ${item.emoji}
+          <span class="cap">صورة توضيحية</span>
+        </div>
+        <div class="tag-body">
+          <h3>${item.breed}</h3>
+          <span class="tag-category">${item.category}</span>
+          <ul class="tag-specs">
+            <li><span>العمر</span><b>${item.age}</b></li>
+            <li><span>الوزن</span><b>${item.weight} كغ</b></li>
+            <li><span>الجنس</span><b>${item.gender}</b></li>
+            <li><span>الموقع</span><b>${item.location}</b></li>
+          </ul>
+          <div class="tag-price">${item.price.toLocaleString('en-US')} ريال</div>
+          <div class="tag-actions">
+            <button class="btn-outline" data-detail="${item.id}">التفاصيل</button>
+            <a class="btn-stamp" href="${waLink(item)}" target="_blank" rel="noopener">تواصل</a>
+          </div>
+        </div>
+      </article>
+    `;
+  }
+
+  function render(){
+    const q = searchInput.value.trim();
+    const filtered = livestock.filter(item => {
+      const matchesCategory = activeFilter === 'الكل' || item.category === activeFilter;
+      const matchesSearch = !q || [item.breed, item.category, item.location].some(f => f.includes(q));
+      return matchesCategory && matchesSearch;
+    });
+
+    resultsCount.textContent = `${filtered.length} نتيجة`;
+
+    if(filtered.length === 0){
+      grid.innerHTML = `
+        <div class="empty-state" style="grid-column:1/-1;">
+          <p>لا توجد نتائج مطابقة لبحثك.</p>
+          <button id="resetFilters">إعادة التصفية</button>
+        </div>`;
+      document.getElementById('resetFilters').addEventListener('click', () => {
+        searchInput.value = '';
+        setActiveTab('الكل');
+        render();
+      });
+      return;
+    }
+
+    grid.innerHTML = filtered.map(cardHTML).join('');
+  }
+
+  function setActiveTab(filter){
+    activeFilter = filter;
+    [...tabs.children].forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.filter === filter);
+    });
+  }
+
+  tabs.addEventListener('click', e => {
+    const btn = e.target.closest('.tab');
+    if(!btn) return;
+    setActiveTab(btn.dataset.filter);
+    render();
+  });
+
+  searchInput.addEventListener('input', render);
+
+  grid.addEventListener('click', e => {
+    const btn = e.target.closest('[data-detail]');
+    if(!btn) return;
+    lastFocused = btn;
+    openModal(Number(btn.dataset.detail));
+  });
+
+  function openModal(id){
+    const item = livestock.find(i => i.id === id);
+    if(!item) return;
+    modalContent.innerHTML = `
+      <h2 id="modalTitle">${item.emoji} ${item.breed}</h2>
+      <span class="modal-cat">${item.category} · رقم الإعلان ${item.serial}</span>
+      <dl>
+        <dt>العمر</dt><dd>${item.age}</dd>
+        <dt>الوزن</dt><dd>${item.weight} كغ</dd>
+        <dt>الجنس</dt><dd>${item.gender}</dd>
+        <dt>الحالة الصحية</dt><dd>${item.health}</dd>
+        <dt>الموقع</dt><dd>${item.location}</dd>
+      </dl>
+      <div class="modal-price">${item.price.toLocaleString('en-US')} ريال</div>
+      <div class="modal-actions">
+        <a class="btn-stamp" href="${waLink(item)}" target="_blank" rel="noopener">تواصل عبر واتساب</a>
+        <button class="btn-outline" id="copySerial">نسخ رقم الإعلان</button>
+      </div>
+    `;
+    modalBackdrop.classList.add('open');
+    modalClose.focus();
+
+    document.getElementById('copySerial').addEventListener('click', () => {
+      navigator.clipboard.writeText(item.serial);
+      document.getElementById('copySerial').textContent = 'تم النسخ ✓';
+    });
+  }
+
+  function closeModal(){
+    modalBackdrop.classList.remove('open');
+    if(lastFocused) lastFocused.focus();
+  }
+
+  modalClose.addEventListener('click', closeModal);
+  modalBackdrop.addEventListener('click', e => {
+    if(e.target === modalBackdrop) closeModal();
+  });
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape' && modalBackdrop.classList.contains('open')) closeModal();
+  });
+
+  render();
+</script>
 </body>
 </html>
